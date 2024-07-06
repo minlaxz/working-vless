@@ -1,0 +1,43 @@
+networks:
+  default:
+    external: true
+    name: proxy-net
+
+# https://sing-box.sagernet.org/installation/docker/
+services:
+  sing-box-app: 
+    image: ghcr.io/minlaxz/nekohasekai-app:main
+    container_name: sing-box-app
+    restart: unless-stopped
+    expose:
+      - "8000"
+    volumes:
+      - ./my-config.json:/home/app/config.json
+      - ./database.db:/home/app/database.db
+      - certs:/home/app/certs
+    env_file:
+      - .env
+    # this entrypoint is using maybe bash?
+    command: python3 -m gunicorn -w 3 wsgi:app -b 0.0.0.0:8000
+
+  sing-box:
+    image: ghcr.io/minlaxz/nekohasekai-singbox:main
+    container_name: sing-box
+    restart: unless-stopped
+    ports:
+      - "2001:2001/udp"
+      - "2002:2002/udp"
+      - "2003:2003/udp"
+      - "3001:3001"
+      - "3002:3002"
+      - "3003:3003"
+    volumes:
+      - ./my-config.json:/etc/sing-box/config.json
+      - certs:/certs
+    depends_on:
+      - sing-box-app
+    # this entrypoint is using /usr/bin/sing-box
+    command: -D /var/lib/sing-box -C /etc/sing-box/ run
+
+volumes:
+  certs:
