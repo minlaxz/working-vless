@@ -15,6 +15,7 @@ services:
       - type: bind
         source: ./server.json
         target: /home/app/my-config.json
+      - ./my-client.json:/home/app/my-client.json
     env_file:
       - .env
 

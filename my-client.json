@@ -1,0 +1,550 @@
+{
+    "log": {
+      "level": "warn",
+      "timestamp": true
+    },
+    "experimental": {
+      "clash_api": {
+        "external_controller": "0.0.0.0:6969"
+      },
+      "cache_file": {
+        "enabled": true
+      }
+    },
+    "dns": {
+      "rules": [
+        {
+          "type": "logical",
+          "mode": "or",
+          "rules": [
+            {
+              "rule_set": ["geosite-category-ads-all"]
+            },
+            {
+              "domain_regex": ["^stun\\..+"]
+            }
+          ],
+          "server": "dns-block"
+        }
+      ],
+      "servers": [
+        {
+          "address": "dns.google.com",
+          "strategy": "ipv4_only",
+          "address_resolver": "dns-local",
+          "detour": "direct-out",
+          "tag": "dns-remote"
+        },
+        {
+          "address": "local",
+          "detour": "direct-out",
+          "tag": "dns-local"
+        },
+        {
+          "address": "rcode://name_error",
+          "tag": "dns-block"
+        }
+      ],
+      "strategy": "ipv4_only",
+      "final": "dns-remote"
+    },
+    "inbounds": [
+      {
+        "type": "tun",
+        "tag": "tun-in",
+        "interface_name": "tun0",
+        "inet4_address": "10.69.69.0/28",
+        "auto_route": true,
+        "strict_route": true,
+        "stack": "system",
+        "sniff": true
+      }
+    ],
+    "outbounds": [
+      {
+        "tag": "Proxied",
+        "type": "selector",
+        "outbounds": [
+          "Best Proxied",
+          "sb-A-sb1",
+          "sb-B-sb1",
+          "sb-D-sb1",
+          "sb-E-sb1",
+          "sb-F-sb1",
+          "sb-A-sb2",
+          "sb-B-sb2",
+          "sb-D-sb2",
+          "sb-E-sb2",
+          "sb-F-sb2",
+          "direct-out"
+        ],
+        "interrupt_exist_connections": false
+      },
+      {
+        "tag": "Best Proxied",
+        "type": "urltest",
+        "outbounds": [
+          "sb-A-sb1",
+          "sb-B-sb1",
+          "sb-D-sb1",
+          "sb-E-sb1",
+          "sb-F-sb1",
+          "sb-A-sb2",
+          "sb-B-sb2",
+          "sb-D-sb2",
+          "sb-E-sb2",
+          "sb-F-sb2"
+        ],
+        "url": "https://detectportal.firefox.com/success.txt",
+        "interval": "60s",
+        "tolerance": 0,
+        "idle_timeout": "1800s",
+        "interrupt_exist_connections": false
+      },
+      {
+        "tag": "Lock Region ID",
+        "type": "selector",
+        "outbounds": [
+          "Best Lock Region ID",
+          "sb-A-sb1",
+          "sb-B-sb1",
+          "sb-D-sb1",
+          "sb-E-sb1",
+          "sb-F-sb1",
+          "sb-A-sb2",
+          "sb-B-sb2",
+          "sb-D-sb2",
+          "sb-E-sb2",
+          "sb-F-sb2",
+          "direct-out"
+        ],
+        "interrupt_exist_connections": false
+      },
+      {
+        "tag": "Best Lock Region ID",
+        "type": "urltest",
+        "outbounds": [
+          "sb-A-sb1",
+          "sb-B-sb1",
+          "sb-D-sb1",
+          "sb-E-sb1",
+          "sb-F-sb1",
+          "sb-A-sb2",
+          "sb-B-sb2",
+          "sb-D-sb2",
+          "sb-E-sb2",
+          "sb-F-sb2"
+        ],
+        "url": "https://detectportal.firefox.com/success.txt",
+        "interval": "60s",
+        "tolerance": 0,
+        "idle_timeout": "1800s",
+        "interrupt_exist_connections": false
+      },
+      {
+        "tag": "Option ADs",
+        "type": "selector",
+        "outbounds": ["block-out", "direct-out"],
+        "interrupt_exist_connections": false
+      },
+      {
+        "tag": "Option P0rn",
+        "type": "selector",
+        "outbounds": ["block-out", "direct-out"],
+        "interrupt_exist_connections": false
+      },
+      {
+        "domain_strategy": "ipv4_only",
+        "tag": "sb-A-sb1",
+        "type": "hysteria2",
+        "server": "sb1.minlaxz.lol",
+        "server_port": 2001,
+        "up_mbps": 10,
+        "down_mbps": 10,
+        "password": "",
+        "obfs": {
+          "type": "salamander",
+          "password": "letsfucktilldaylight"
+        },
+        "tls": {
+          "enabled": true,
+          "alpn": ["http/1.1", "h2", "h3"],
+          "server_name": "google.com",
+          "insecure": true
+        }
+      },
+      {
+        "domain_strategy": "ipv4_only",
+        "tag": "sb-B-sb1",
+        "type": "tuic",
+        "server": "sb1.minlaxz.lol",
+        "server_port": 2002,
+        "uuid": "",
+        "password": "",
+        "congestion_control": "bbr",
+        "tls": {
+          "enabled": true,
+          "alpn": ["h3"],
+          "server_name": "google.com",
+          "insecure": true
+        }
+      },
+      {
+        "domain_strategy": "ipv4_only",
+        "tag": "sb-D-sb1",
+        "type": "trojan",
+        "server": "sb1.minlaxz.lol",
+        "server_port": 3001,
+        "password": "",
+        "tls": {
+          "enabled": true,
+          "server_name": "google.com",
+          "insecure": true,
+          "utls": {
+            "enabled": true,
+            "fingerprint": "chrome"
+          }
+        },
+        "multiplex": {
+          "enabled": true,
+          "protocol": "smux",
+          "max_connections": 5,
+          "min_streams": 4,
+          "max_streams": 0,
+          "brutal": {
+            "enabled": true,
+            "up_mbps": 10,
+            "down_mbps": 10
+          }
+        },
+        "connect_timeout": "5s",
+        "tcp_fast_open": true,
+        "udp_fragment": true
+      },
+      {
+        "domain_strategy": "ipv4_only",
+        "tag": "sb-E-sb1",
+        "type": "vless",
+        "server": "sb1.minlaxz.lol",
+        "server_port": 3002,
+        "uuid": "",
+        "flow": "xtls-rprx-vision",
+        "tls": {
+          "enabled": true,
+          "server_name": "google.com",
+          "insecure": true,
+          "alpn": ["http/1.1", "h2", "h3"],
+          "utls": {
+            "enabled": true,
+            "fingerprint": "chrome"
+          },
+          "reality": {
+            "enabled": true,
+            "public_key": "6ch9W83kWIWd--muNY3NsXHcF6qMA2B_gtx1TR7gyhA",
+            "short_id": ""
+          }
+        },
+        "packet_encoding": "xudp",
+        "multiplex": {
+          "enabled": true,
+          "protocol": "smux",
+          "max_connections": 5,
+          "min_streams": 4,
+          "max_streams": 0,
+          "brutal": {
+            "enabled": true,
+            "up_mbps": 10,
+            "down_mbps": 10
+          }
+        }
+      },
+      {
+        "type": "shadowsocks",
+        "tag": "sb-F-sb1",
+        "detour": "shadowtls-out",
+        "method": "2022-blake3-aes-128-gcm",
+        "password": "9KUC+eb00tK89YpOtejHbg==",
+        "multiplex": {
+          "enabled": true
+        }
+      },
+      {
+        "type": "shadowtls",
+        "tag": "shadowtls-out",
+        "server": "sb1.minlaxz.lol",
+        "server_port": 3003,
+        "version": 3,
+        "password": "",
+        "tls": {
+          "enabled": true,
+          "server_name": "google.com",
+          "insecure": true,
+          "utls": {
+            "enabled": true,
+            "fingerprint": "chrome"
+          }
+        }
+      },
+      {
+        "domain_strategy": "ipv4_only",
+        "tag": "sb-A-sb2",
+        "type": "hysteria2",
+        "server": "sb2.minlaxz.lol",
+        "server_port": 2001,
+        "up_mbps": 10,
+        "down_mbps": 10,
+        "password": "",
+        "obfs": {
+          "type": "salamander",
+          "password": "letsfucktilldaylight"
+        },
+        "tls": {
+          "enabled": true,
+          "alpn": ["http/1.1", "h2", "h3"],
+          "server_name": "google.com",
+          "insecure": true
+        }
+      },
+      {
+        "domain_strategy": "ipv4_only",
+        "tag": "sb-B-sb2",
+        "type": "tuic",
+        "server": "sb2.minlaxz.lol",
+        "server_port": 2002,
+        "uuid": "",
+        "password": "",
+        "congestion_control": "bbr",
+        "tls": {
+          "enabled": true,
+          "alpn": ["http/1.1", "h2", "h3"],
+          "server_name": "google.com",
+          "insecure": true
+        }
+      },
+      {
+        "domain_strategy": "ipv4_only",
+        "tag": "sb-D-sb2",
+        "type": "trojan",
+        "server": "sb2.minlaxz.lol",
+        "server_port": 3001,
+        "password": "",
+        "tls": {
+          "enabled": true,
+          "alpn": ["http/1.1", "h2", "h3"],
+          "server_name": "google.com",
+          "insecure": true,
+          "utls": {
+            "enabled": true,
+            "fingerprint": "chrome"
+          }
+        },
+        "multiplex": {
+          "enabled": true,
+          "protocol": "smux",
+          "max_connections": 5,
+          "min_streams": 4,
+          "max_streams": 0,
+          "brutal": {
+            "enabled": true,
+            "up_mbps": 10,
+            "down_mbps": 10
+          }
+        },
+        "connect_timeout": "5s",
+        "tcp_fast_open": true,
+        "udp_fragment": true
+      },
+      {
+        "domain_strategy": "ipv4_only",
+        "tag": "sb-E-sb2",
+        "type": "vless",
+        "server": "sb2.minlaxz.lol",
+        "server_port": 3002,
+        "uuid": "",
+        "flow": "xtls-rprx-vision",
+        "tls": {
+          "enabled": true,
+          "server_name": "google.com",
+          "insecure": true,
+          "alpn": ["http/1.1", "h2", "h3"],
+          "utls": {
+            "enabled": true,
+            "fingerprint": "chrome"
+          },
+          "reality": {
+            "enabled": true,
+            "public_key": "6ch9W83kWIWd--muNY3NsXHcF6qMA2B_gtx1TR7gyhA",
+            "short_id": ""
+          }
+        },
+        "packet_encoding": "xudp",
+        "multiplex": {
+          "enabled": true,
+          "protocol": "smux",
+          "max_connections": 5,
+          "min_streams": 4,
+          "max_streams": 0,
+          "brutal": {
+            "enabled": true,
+            "up_mbps": 10,
+            "down_mbps": 10
+          }
+        }
+      },
+      {
+        "type": "shadowsocks",
+        "tag": "sb-F-sb2",
+        "detour": "shadowtls-out-sb2",
+        "method": "2022-blake3-aes-128-gcm",
+        "password": "9KUC+eb00tK89YpOtejHbg==",
+        "multiplex": {
+          "enabled": true
+        }
+      },
+      {
+        "type": "shadowtls",
+        "tag": "shadowtls-out-sb2",
+        "server": "sb2.minlaxz.lol",
+        "server_port": 3003,
+        "version": 3,
+        "password": "",
+        "tls": {
+          "enabled": true,
+          "server_name": "google.com",
+          "insecure": true,
+          "utls": {
+            "enabled": true,
+            "fingerprint": "chrome"
+          }
+        }
+      },
+      {
+        "tag": "direct-out",
+        "type": "direct"
+      },
+      {
+        "tag": "block-out",
+        "type": "block"
+      },
+      {
+        "tag": "dns-out",
+        "type": "dns"
+      }
+    ],
+    "route": {
+      "geoip": {
+        "download_url": "https://cdn.jsdelivr.net/gh/SagerNet/sing-geoip@release/geoip.db",
+        "download_detour": "sb-A-sb1"
+      },
+      "geosite": {
+        "download_url": "https://cdn.jsdelivr.net/gh/SagerNet/sing-geosite@release/geosite.db",
+        "download_detour": "sb-A-sb1"
+      },
+      "rule_set": [
+        {
+          "tag": "geosite-category-ads-all",
+          "type": "remote",
+          "format": "binary",
+          "url": "https://cdn.jsdelivr.net/gh/SagerNet/sing-geosite@rule-set/geosite-category-ads-all.srs",
+          "update_interval": "1d",
+          "download_detour": "sb-A-sb1"
+        },
+        {
+          "tag": "geosite-category-porn",
+          "type": "remote",
+          "format": "binary",
+          "url": "https://cdn.jsdelivr.net/gh/SagerNet/sing-geosite@rule-set/geosite-category-porn.srs",
+          "update_interval": "1d",
+          "download_detour": "sb-A-sb1"
+        },
+        {
+          "tag": "geosite-facebook",
+          "type": "remote",
+          "format": "binary",
+          "url": "https://cdn.jsdelivr.net/gh/SagerNet/sing-geosite@rule-set/geosite-facebook.srs",
+          "update_interval": "1d",
+          "download_detour": "sb-A-sb1"
+        },
+        {
+          "tag": "geosite-messenger",
+          "type": "remote",
+          "format": "binary",
+          "url": "https://cdn.jsdelivr.net/gh/SagerNet/sing-geosite@rule-set/geosite-messenger.srs",
+          "update_interval": "1d",
+          "download_detour": "sb-A-sb1"
+        },
+        {
+          "tag": "geosite-private",
+          "type": "remote",
+          "format": "binary",
+          "url": "https://cdn.jsdelivr.net/gh/SagerNet/sing-geosite@rule-set/geosite-private.srs",
+          "update_interval": "1d",
+          "download_detour": "sb-A-sb1"
+        },
+        {
+          "tag": "geoip-mm",
+          "type": "remote",
+          "format": "binary",
+          "url": "https://cdn.jsdelivr.net/gh/SagerNet/sing-geoip@rule-set/geoip-mm.srs",
+          "update_interval": "1d",
+          "download_detour": "sb-A-sb1"
+        },
+        {
+          "tag": "geoip-jp",
+          "type": "remote",
+          "format": "binary",
+          "url": "https://cdn.jsdelivr.net/gh/SagerNet/sing-geoip@rule-set/geoip-jp.srs",
+          "update_interval": "1d",
+          "download_detour": "sb-A-sb1"
+        }
+      ],
+      "rules": [
+        {
+          "inbound": ["dns-in"],
+          "outbound": "dns-out"
+        },
+        {
+          "port": [53],
+          "outbound": "dns-out"
+        },
+        {
+          "type": "logical",
+          "mode": "or",
+          "rules": [
+            {
+              "rule_set": ["geosite-facebook", "geosite-messenger"]
+            }
+          ],
+          "outbound": "Proxied"
+        },
+        {
+          "type": "logical",
+          "mode": "or",
+          "rules": [
+            {
+              "rule_set": ["geosite-category-ads-all"]
+            }
+          ],
+          "outbound": "Option ADs"
+        },
+        {
+          "rule_set": ["geosite-category-porn"],
+          "outbound": "Option P0rn"
+        },
+        {
+          "type": "logical",
+          "mode": "or",
+          "rules": [{ "rule_set": ["geosite-private"] }],
+          "outbound": "direct-out"
+        },
+        {
+          "geoip": ["geoip-mm"],
+          "outbound": "Lock Region ID"
+        }
+      ],
+      "auto_detect_interface": true,
+      "override_android_vpn": true,
+      "final": "direct-out"
+    }
+  }
+  
